@@ -55,6 +55,37 @@ jobs:
           chmod +x argocd
           sudo mv argocd /usr/local/bin/argocd
 
+      - name: Login to ArgoCD
+        shell: bash
+        run: |
+          argocd login argocd-server.argocd \
+            --grpc-web \
+            --username admin \
+            --password ${{ '${{ secrets.ARGOCD_PASSWORD }}' }} \
+            --insecure
+      
+      - name: Ensure argocd repo and app
+        shell: bash
+        run: |
+          repo_url="https://github.com/bruno-melo-almeida/${{values.app_name}}.git"
+          argocd repo list \
+          | grep -q "$repo_url" || argocd repo add \
+          $repo_url \
+          --name ${{values.app_name}} \
+          --project default
+
+          if ! argocd app get ${{values.app_name}}; then
+            argocd app create ${{values.app_name}} \
+              --repo $repo_url \
+              --path charts/${{values.app_name}} \
+              --dest-server https://kubernetes.default.svc \
+              --values values-${{values.app_env}}.yaml \
+              --revision main \
+              --sync-policy manual \
+              --sync-option CreateNamespace=true \
+              --dest-namespace ${{values.app_env}}
+          fi
+
       - name: Argocd app sync
         shell: bash
         run: |
@@ -64,3 +95,4 @@ jobs:
             --password ${{ '${{ secrets.ARGOCD_PASSWORD }}' }} \
             --insecure
           argocd app sync ${{values.app_name}}
+          argocd app wait ${{values.app_name}} --timeout 100
