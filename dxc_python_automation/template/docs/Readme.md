@@ -4,7 +4,7 @@ Este repositório contém templates de arquitetura de projetos Python que utiliz
 
 ### Estrutura do Repositório
 ```
-├── ${{values.automation_name}}
+├── ${{values.app_name}}
 │   ├── app
 │       ├── __init__.py
 │
