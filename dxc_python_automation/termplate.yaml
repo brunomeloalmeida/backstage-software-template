@@ -1,0 +1,50 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: python-dxc-automation-template
+  title: Python DxC Automation
+  description: Provisions a minimalistic python automation
+spec:
+  owner: development
+  type: service
+
+  parameters:
+    - title: Fill in some steps
+      required:
+        - automation_name
+      properties:
+        automation_name:
+          title: Automation Name
+          type: string
+          description: Provide a automation (microservice) name
+          pattern: '^([a-zA-Z][a-zA-Z0-9]*)(-[a-zA-Z0-9]+)*$'
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base
+      action: fetch:template
+      input:
+        url: ./template
+        values:
+          app_name: ${{parameters.component_id}}
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        description: This is ${{ parameters.component_id }}
+        repoUrl: github.com?owner=bruno-melo-almeida&repo=${{parameters.component_id}}
+        protectDefaultBranch: false
+        repoVisibility: public
+
+    - id: register
+      name: Register
+      action: catalog:register
+      input:
+        repoContentsUrl: ${{ steps['publish'].output.repoContentsUrl }}
+        catalogInfoPath: "/catalog-info.yaml"
+
+  output:
+    links:
+      - title: Repository
+        url: ${{ steps['publish'].output.remoteUrl }}
