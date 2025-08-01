@@ -26,14 +26,14 @@ spec:
       input:
         url: ./template
         values:
-          app_name: ${{parameters.component_id}}
+          app_name: ${{parameters.automation_name}}
 
     - id: publish
       name: Publish
       action: publish:github
       input:
-        description: This is ${{ parameters.component_id }}
-        repoUrl: github.com?owner=bruno-melo-almeida&repo=${{parameters.component_id}}
+        description: This is ${{ parameters.automation_name }}
+        repoUrl: github.com?owner=bruno-melo-almeida&repo=${{parameters.automation_name}}
         protectDefaultBranch: false
         repoVisibility: public
 
